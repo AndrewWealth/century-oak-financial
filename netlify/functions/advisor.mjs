@@ -7,10 +7,12 @@ export default async (req) => {
     });
   }
 
-  // Get API key from environment — set in Netlify dashboard, never in code
+  // Credentials come from the environment — injected automatically by Netlify AI Gateway,
+  // or set manually in the Netlify dashboard. Never hardcode keys in code.
   const apiKey = Netlify.env.get('ANTHROPIC_API_KEY');
+  const baseUrl = (Netlify.env.get('ANTHROPIC_BASE_URL') || 'https://api.anthropic.com').replace(/\/+$/, '');
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'API key not configured. Add ANTHROPIC_API_KEY to your Netlify environment variables.' }), {
+    return new Response(JSON.stringify({ error: 'API key not configured. Enable Netlify AI Gateway or add ANTHROPIC_API_KEY to your Netlify environment variables.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -28,7 +30,7 @@ export default async (req) => {
 
   // Forward to Anthropic — key never touches the browser
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(`${baseUrl}/v1/messages`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -36,7 +38,7 @@ export default async (req) => {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-haiku-5-5',
         max_tokens: 1024,
         system: body.system,
         tools: body.tools || [],

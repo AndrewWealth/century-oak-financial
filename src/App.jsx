@@ -170,7 +170,7 @@ export default function App() {
       try { data = JSON.parse(raw); }
       catch { throw new Error("Unexpected server error (" + res.status + "). Please try again."); }
 
-      if (!res.ok || data.error) throw new Error(data.error ? data.error.message : "Request failed. Please try again.");
+      if (!res.ok || data.error) throw new Error((typeof data.error === "string" ? data.error : data.error?.message) || "Request failed. Please try again.");
 
       setStatus("Building your brief...");
 
